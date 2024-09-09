@@ -1,0 +1,69 @@
+/* Gantt Chart Styles */
+.gantt-container {
+    position: relative;
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #ccc;
+    padding: 20px;
+}
+
+.gantt-years {
+    display: flex;
+    position: relative;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 20px;
+}
+
+/* Year Labels with Single Color */
+.gantt-year {
+    flex: 1;
+    text-align: center;
+    font-weight: bold;
+    padding: 10px 0;
+    color: white;
+    background-color: #3498DB;
+    /* Single color - Blue */
+    border-right: 2px solid #fff;
+    /* White border to separate years */
+    border-radius: 5px 5px 0 0;
+    /* Rounded corners for a cleaner look */
+}
+
+/* Gantt Event Bars */
+.gantt-event {
+    position: absolute;
+    height: 30px;
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+    line-height: 30px;
+    padding: 0 10px;
+    background-color: #4CAF50;
+    /* Green */
+}
+
+/* Example Color Palette for Event Bars */
+.color-1 {
+    background-color: #4CAF50;
+    /* Green */
+}
+
+.color-2 {
+    background-color: #FF5733;
+    /* Red */
+}
+
+.color-3 {
+    background-color: #3498DB;
+    /* Blue */
+}
+
+.color-4 {
+    background-color: #F1C40F;
+    /* Yellow */
+}
+
+.gantt-chart {
+    position: relative;
+    height: 200px;
+}
