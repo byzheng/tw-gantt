@@ -29,6 +29,20 @@
     /* Rounded corners for a cleaner look */
 }
 
+
+/* Year Labels with Single Color */
+.gantt-people {
+    
+    text-align: center;
+    font-weight: bold;
+    padding: 10px 0;
+    color: white;
+    background-color: #3498DB;
+    border-right: 2px solid #fff;
+    border-radius: 5px 5px 0 0;
+    width:100px;
+}
+
 /* Gantt Event Bars */
 .gantt-event {
     position: absolute;
@@ -38,7 +52,9 @@
     text-align: center;
     line-height: 30px;
     padding: 0 10px;
-    background-color: #4CAF50;
+    background-color: #d8e7d8;
+    overflow: hidden; 
+    text-overflow: ellipsis; 
     /* Green */
 }
 
