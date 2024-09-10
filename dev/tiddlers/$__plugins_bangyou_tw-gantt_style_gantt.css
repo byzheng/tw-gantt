@@ -31,16 +31,31 @@
 
 
 /* Year Labels with Single Color */
-.gantt-people {
+.gantt-peoples {
     
     text-align: center;
     font-weight: bold;
     padding: 10px 0;
     color: white;
-    background-color: #3498DB;
+    background-color: #83bfe6;
     border-right: 2px solid #fff;
     border-radius: 5px 5px 0 0;
     width:100px;
+}
+
+/* Year Labels with Single Color */
+.gantt-people {
+    
+    position: absolute;
+    height: 30px;
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+    line-height: 30px;
+    padding: 0 10px;
+    background-color: #cddaf0;
+    overflow: hidden; 
+    text-overflow: ellipsis; 
 }
 
 /* Gantt Event Bars */

@@ -8,13 +8,6 @@ Anything LLM in tiddlywiki 5
     /*jslint node: true, browser: true */
     /*global $tw: false */
     "use strict";
-    function dateDiffInDays(start, end) {
-        const oneDay = 1000 * 60 * 60 * 24;
-        const startDate = new Date(start);
-        const endDate = new Date(end);
-        return Math.round((endDate - startDate) / oneDay);
-    }
-
     function parseDate(dateString) {
         const year = parseInt(dateString.substring(0, 4), 10);
         const month = parseInt(dateString.substring(4, 6), 10) - 1; // Months are 0-based in JavaScript
@@ -23,10 +16,6 @@ Anything LLM in tiddlywiki 5
     }
     function isValidDate(d) {
         return d instanceof Date && !isNaN(d);
-    }
-
-    if ($tw.browser) {
-
     }
 
     var Widget = require("$:/core/modules/widgets/widget.js").widget;
@@ -110,7 +99,8 @@ Anything LLM in tiddlywiki 5
                     start: start,
                     end: end,
                     name: name,
-                    title: title
+                    title: title,
+                    people: people
                 })
             };
 
@@ -130,7 +120,7 @@ Anything LLM in tiddlywiki 5
             //renderYears(startYear, endYear, yearLabelsContainer, pixelsPerYear);
             // Function to render year labels
             const peopleDiv = document.createElement('div');
-            peopleDiv.className = 'gantt-people';
+            peopleDiv.className = 'gantt-peoples';
             peopleDiv.style.width = peopleWidth + 'px';
             yearLabelsContainer.appendChild(peopleDiv);
             for (let i = startYear; i <= endYear; i++) {
@@ -159,9 +149,48 @@ Anything LLM in tiddlywiki 5
 
                 return { position, barWidth };
             }
+
+            function createBar(position, barWidth, top, title, className = "gantt-event") {
+                // Create event bar
+                const eventBar = document.createElement('div');
+                eventBar.className = className;
+                eventBar.style.left = position + 'px';
+                eventBar.style.width = barWidth + 'px';
+                eventBar.style.top =  top + 'px';
+                // create a link to tiddler
+                let dom_link = document.createElement('a');
+                dom_link.classList.add("tiddler-link");
+                dom_link.classList.add("tc-tiddlylink");
+                dom_link.classList.add("tc-tiddlylink-resolves");
+                dom_link.setAttribute("href", "#" + encodeURIComponent(title));
+                dom_link.innerText = title;
+                dom_link.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    the_story.addToStory(title, current_tiddler, {
+                        openLinkFromInsideRiver: openLinkFromInsideRiver,
+                        openLinkFromOutsideRiver: openLinkFromOutsideRiver
+                    });
+                    the_story.addToHistory(title);
+                });
+
+                eventBar.appendChild(dom_link);
+                return eventBar;
+            }
+
             // Set container width based on total days
             //container.style.width = `${totalDays * 20}px`;
             events.forEach((event, index) => {
+                // position of top
+                const top = (index * 40);
+                // Add people
+                if (event.people !== undefined) {
+                    event.people.forEach((people, index) => {
+                        const position = peopleWidth * index / event.people.length;
+                        const width = peopleWidth / event.people.length;
+                        let peopleBar = createBar(position, width, top, people, "gantt-people");
+                        chartContainer.appendChild(peopleBar);
+                    });
+                }
                 let start = event.start;
                 let end = event.end;
                 // If mising start or end assume from start to end years
@@ -173,30 +202,7 @@ Anything LLM in tiddlywiki 5
                 }
                 const { position, barWidth } = calculatePosition(start, end);
 
-                // Create event bar
-                const eventBar = document.createElement('div');
-                eventBar.className = 'gantt-event';
-                eventBar.style.left = position + 'px';
-                eventBar.style.width = barWidth + 'px';
-                eventBar.style.top = (index * 40) + 'px';
-                // create a link to tiddler
-                let dom_link = document.createElement('a');
-                dom_link.classList.add("tiddler-link");
-                dom_link.classList.add("tc-tiddlylink");
-                dom_link.classList.add("tc-tiddlylink-resolves");
-                dom_link.setAttribute("href", "#" + encodeURIComponent(event.title));
-                dom_link.innerText = event.title;
-                dom_link.addEventListener("click", function (e) {
-                    e.preventDefault();
-                    the_story.addToStory(event.title, current_tiddler, {
-                        openLinkFromInsideRiver: openLinkFromInsideRiver,
-                        openLinkFromOutsideRiver: openLinkFromOutsideRiver
-                    });
-                    the_story.addToHistory(event.title);
-                });
-
-                eventBar.appendChild(dom_link);
-
+                let eventBar = createBar(position, barWidth, top, event.title);
                 chartContainer.appendChild(eventBar);
             });
             chartContainer.style.height = (events.length * 40) + "px";
