@@ -109,11 +109,12 @@ Anything LLM in tiddlywiki 5
             const years = endYear - startYear + 1;
 
             // Gantt Chart Setup
-            const peopleWidth = 150;
+            const peopleWidth = 10;
             const containerStyles = window.getComputedStyle(container, null);
-            const chartWidth = chartContainer.getBoundingClientRect().width -
-                //parseFloat(containerStyles.paddingLeft) -
-                parseFloat(containerStyles.paddingRight) - peopleWidth;
+            // const chartWidth = chartContainer.getBoundingClientRect().width -
+            //     //parseFloat(containerStyles.paddingLeft) -
+            //     parseFloat(containerStyles.paddingRight) - peopleWidth;
+            const chartWidth = 100 - peopleWidth;
             const pixelsPerYear = chartWidth / years;
 
 
@@ -121,12 +122,12 @@ Anything LLM in tiddlywiki 5
             // Function to render year labels
             const peopleDiv = document.createElement('div');
             peopleDiv.className = 'gantt-peoples';
-            peopleDiv.style.width = peopleWidth + 'px';
+            peopleDiv.style.width = peopleWidth + '%';
             yearLabelsContainer.appendChild(peopleDiv);
             for (let i = startYear; i <= endYear; i++) {
                 const yearDiv = document.createElement('div');
                 yearDiv.className = 'gantt-year';
-                yearDiv.style.width = pixelsPerYear + 'px';
+                yearDiv.style.width = pixelsPerYear + '%';
                 yearDiv.textContent = i;
                 yearLabelsContainer.appendChild(yearDiv);
             }
@@ -154,8 +155,8 @@ Anything LLM in tiddlywiki 5
                 // Create event bar
                 const eventBar = document.createElement('div');
                 eventBar.className = className;
-                eventBar.style.left = position + 'px';
-                eventBar.style.width = barWidth + 'px';
+                eventBar.style.left = position + '%';
+                eventBar.style.width = barWidth + '%';
                 eventBar.style.top =  top + 'px';
                 // create a link to tiddler
                 let dom_link = document.createElement('a');
