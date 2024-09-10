@@ -162,7 +162,11 @@ Anything LLM in tiddlywiki 5
                 let dom_link = document.createElement('a');
                 dom_link.classList.add("tiddler-link");
                 dom_link.classList.add("tc-tiddlylink");
-                dom_link.classList.add("tc-tiddlylink-resolves");
+                if ($tw.wiki.tiddlerExists(title)) {
+                    dom_link.classList.add("tc-tiddlylink-resolves");
+                } else {
+                    dom_link.classList.add("tc-tiddlylink-missing");
+                }
                 dom_link.setAttribute("href", "#" + encodeURIComponent(title));
                 dom_link.innerText = title;
                 dom_link.addEventListener("click", function (e) {

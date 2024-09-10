@@ -12,6 +12,7 @@
     position: relative;
     border-bottom: 1px solid #ccc;
     margin-bottom: 20px;
+    width:100%
 }
 
 /* Year Labels with Single Color */
@@ -37,7 +38,7 @@
     font-weight: bold;
     padding: 10px 0;
     color: white;
-    background-color: #83bfe6;
+    background-color: #3498DB;
     border-right: 2px solid #fff;
     border-radius: 5px 5px 0 0;
     width:100px;

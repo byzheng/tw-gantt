@@ -1,0 +1,31 @@
+created: 20220727034051393
+modified: 20240910001734085
+order: 10
+tags: doc Contents tutorial
+title: GanttWidget
+type: text/vnd.tiddlywiki
+
+!! Gantt Widget
+
+The `gantt` widget is to render a gantt chart.
+
+!! Syntax
+
+```
+<$gantt filter="[tag[Event]]" />
+```
+
+
+!! Content and attributes
+|!Attributes |!Type |!Description |
+|filter |required|The `filter` to select events |
+|start |optional|The `start` field for event start. If missing, the `start` field will be used |
+|end |optional|The `end` field for event end. If missing, the `end` field will be used |
+
+!! Example
+
+```
+<$gantt filter="[tag[Event]]"/>
+```
+
+<$gantt filter="[tag[Event]]"/>
