@@ -69,14 +69,14 @@ Anything LLM in tiddlywiki 5
             // get start and end years
             let startYear = 9999;
             let endYear = -9999;
-            let eventsTiddlers = $tw.wiki.filterTiddlers(filter);
+            let eventsTiddlers = this.wiki.filterTiddlers(filter,this);
             if (eventsTiddlers.length === 0) {
                 container.innerText = "no events are found.";
             }
             let events = [];
             for (let i = 0; i < eventsTiddlers.length; i++) {
                 const event = $tw.wiki.getTiddler(eventsTiddlers[i]);
-                let start, end, name, title, people;
+                let start, end, caption, title, people;
                 if (event.fields[startField] !== undefined) {
                     start = parseDate(event.fields[startField]);
                     if (start.getFullYear() < startYear) {
@@ -90,9 +90,9 @@ Anything LLM in tiddlywiki 5
                     }
                 }
                 if (event.fields.caption !== undefined) {
-                    name = event.fields.caption;
+                    caption = event.fields.caption;
                 } else {
-                    name = event.fields.title;
+                    caption = event.fields.title;
                 }
                 if (event.fields[peopleField] !== undefined) {
                     people = $tw.utils.parseStringArray("" + event.fields[peopleField], true);
@@ -101,7 +101,7 @@ Anything LLM in tiddlywiki 5
                 events.push({
                     start: start,
                     end: end,
-                    name: name,
+                    caption: caption,
                     title: title,
                     people: people
                 })
@@ -156,15 +156,7 @@ Anything LLM in tiddlywiki 5
 
                 return { position, barWidth };
             }
-
-            function createBar(position, barWidth, top, title, className = "gantt-event") {
-                // Create event bar
-                const eventBar = document.createElement('div');
-                eventBar.className = className;
-                eventBar.style.left = position + '%';
-                eventBar.style.width = barWidth + '%';
-                eventBar.style.top =  top + 'px';
-                // create a link to tiddler
+            function tiddlerLink(title, caption = title) {
                 let dom_link = document.createElement('a');
                 dom_link.classList.add("tiddler-link");
                 dom_link.classList.add("tc-tiddlylink");
@@ -174,7 +166,7 @@ Anything LLM in tiddlywiki 5
                     dom_link.classList.add("tc-tiddlylink-missing");
                 }
                 dom_link.setAttribute("href", "#" + encodeURIComponent(title));
-                dom_link.innerText = title;
+                dom_link.innerText = caption;
                 dom_link.addEventListener("click", function (e) {
                     e.preventDefault();
                     the_story.addToStory(title, current_tiddler, {
@@ -183,7 +175,18 @@ Anything LLM in tiddlywiki 5
                     });
                     the_story.addToHistory(title);
                 });
-
+                return dom_link
+            }
+            function createBar(position, barWidth, top, title, caption = title, className = "gantt-event") {
+                // Create event bar
+                const eventBar = document.createElement('div');
+                eventBar.className = className;
+                eventBar.style.left = position + '%';
+                eventBar.style.width = barWidth + '%';
+                eventBar.style.top =  top + 'px';
+                // create a link to tiddler
+                
+                const dom_link = tiddlerLink(title, caption);
                 eventBar.appendChild(dom_link);
                 return eventBar;
             }
@@ -198,7 +201,7 @@ Anything LLM in tiddlywiki 5
                     event.people.forEach((people, index) => {
                         const position = peopleWidth * index / event.people.length;
                         const width = peopleWidth / event.people.length;
-                        let peopleBar = createBar(position, width, top, people, "gantt-people");
+                        let peopleBar = createBar(position, width, top, people, people, "gantt-people");
                         chartContainer.appendChild(peopleBar);
                     });
                 }
@@ -213,7 +216,7 @@ Anything LLM in tiddlywiki 5
                 }
                 const { position, barWidth } = calculatePosition(start, end);
 
-                let eventBar = createBar(position, barWidth, top, event.title);
+                let eventBar = createBar(position, barWidth, top, event.title, event.caption);
                 chartContainer.appendChild(eventBar);
             });
             chartContainer.style.height = (events.length * 40) + "px";

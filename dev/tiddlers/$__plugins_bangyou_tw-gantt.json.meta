@@ -1,12 +1,12 @@
 author: Bangyou Zheng
 created: 20240801213656241
-description: tw-anythingllm is a wrapper Anything LLM
-modified: 20240909092438731
-name: tw-anythingllm
-parent-plugin: $:/plugins/bangyou/tw-anythingllm
+description: tw-gantt is to Gantt Chart in Tiddlywiki
+modified: 20240910101824967
+name: tw-gantt
+parent-plugin: 
 plugin-draft: plugin
-source: https://github.com/byzheng/tw-anythingllm
+source: https://github.com/byzheng/tw-gantt
 tags: 
 title: $:/plugins/bangyou/tw-gantt
 type: application/json
-version: 0.1.3
+version: 0.0.3
