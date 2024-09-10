@@ -39,16 +39,17 @@ Anything LLM in tiddlywiki 5
         var the_story = new $tw.Story({
             wiki: $tw.wiki
         });
-
-        // whole conatianer
-        let container = document.createElement('div');
+        this.uuid = (Math.random() + 1).toString(36).substring(3);
+		let container = document.createElement('div');
         container.classList.add("gantt-container");
+        container.id = this.uuid;
         parent.insertBefore(container, nextSibling);
 
         var filter = this.getAttribute('filter', '');
         if (filter == "") {
             container.innerHTML = "filter is empty."
         }
+        this.filter = filter;
         var startField = this.getAttribute('start', 'start');
         var endField = this.getAttribute('end', 'end');
         var peopleField = this.getAttribute('people', 'people');
@@ -69,13 +70,14 @@ Anything LLM in tiddlywiki 5
             // get start and end years
             let startYear = 9999;
             let endYear = -9999;
-            let eventsTiddlers = this.wiki.filterTiddlers(filter,this);
-            if (eventsTiddlers.length === 0) {
+            this.eventsTiddlers = this.wiki.filterTiddlers(filter, this);
+
+            if (this.eventsTiddlers.length === 0) {
                 container.innerText = "no events are found.";
             }
             let events = [];
-            for (let i = 0; i < eventsTiddlers.length; i++) {
-                const event = $tw.wiki.getTiddler(eventsTiddlers[i]);
+            for (let i = 0; i < this.eventsTiddlers.length; i++) {
+                const event = $tw.wiki.getTiddler(this.eventsTiddlers[i]);
                 let start, end, caption, title, people;
                 if (event.fields[startField] !== undefined) {
                     start = parseDate(event.fields[startField]);
@@ -183,9 +185,9 @@ Anything LLM in tiddlywiki 5
                 eventBar.className = className;
                 eventBar.style.left = position + '%';
                 eventBar.style.width = barWidth + '%';
-                eventBar.style.top =  top + 'px';
+                eventBar.style.top = top + 'px';
                 // create a link to tiddler
-                
+
                 const dom_link = tiddlerLink(title, caption);
                 eventBar.appendChild(dom_link);
                 return eventBar;
@@ -231,7 +233,53 @@ Anything LLM in tiddlywiki 5
     /*
     Selectively refreshes the widget if needed. Returns true if the widget or any of its children needed re-rendering
      */
-    MyWidget.prototype.refresh = function (changedTiddlers) { };
+    MyWidget.prototype.refresh = function (changedTiddlers) {
+        // skip if draft, temp, state tiddlers
+        let non_normal_count = 0;
+        for (let key in changedTiddlers) {
+            // if in the editing mode
+            if (key.startsWith("Draft of ")) {
+                non_normal_count++;
+                continue;
+            }
+            // if system tiddler
+            if ($tw.wiki.isSystemTiddler(key)) {
+                non_normal_count++;
+                continue;
+            }
+        }
+        // return if all tiddlers are system or draft
+        if (non_normal_count === Object.keys(changedTiddlers).length) {
+            return false;
+        }
+
+        var changedAttributes = this.computeAttributes();            
+        var newEventsTiddlers = this.wiki.filterTiddlers(this.filter, this);
+        if (newEventsTiddlers.length !== this.eventsTiddlers.length) {
+            is_changed_tiddler = true;
+        } else {
+            var is_changed_tiddler = false;
+            for (let i = 0; i < this.eventsTiddlers.length; i++) {
+                if (changedTiddlers[this.eventsTiddlers[i]]) {
+                    is_changed_tiddler = true;
+                    break;
+                }
+            }
+        }
+        if (changedAttributes.filter || changedAttributes.start ||
+            changedAttributes.end || changedAttributes.people ||
+            is_changed_tiddler) {
+            // destory old on
+            if (this.uuid) {
+                var element = document.getElementById(this.uuid);
+                element.parentNode.removeChild(element);
+            }
+            this.refreshSelf();
+            return true;
+        } else {
+            return false;
+        }
+    };
 
     exports.gantt = MyWidget;
 
