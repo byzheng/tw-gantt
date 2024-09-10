@@ -49,6 +49,9 @@ Anything LLM in tiddlywiki 5
         if (filter == "") {
             container.innerHTML = "filter is empty."
         }
+        var startField = this.getAttribute('start', 'start');
+        var endField = this.getAttribute('end', 'end');
+        var peopleField = this.getAttribute('people', 'people');
         try {
             // Create elements for gantt charts
             let yearLabelsContainer = document.createElement('div');
@@ -74,14 +77,14 @@ Anything LLM in tiddlywiki 5
             for (let i = 0; i < eventsTiddlers.length; i++) {
                 const event = $tw.wiki.getTiddler(eventsTiddlers[i]);
                 let start, end, name, title, people;
-                if (event.fields.start !== undefined) {
-                    start = parseDate(event.fields.start);
+                if (event.fields[startField] !== undefined) {
+                    start = parseDate(event.fields[startField]);
                     if (start.getFullYear() < startYear) {
                         startYear = start.getFullYear();
                     }
                 }
-                if (event.fields.end !== undefined) {
-                    end = parseDate(event.fields.end);
+                if (event.fields[endField] !== undefined) {
+                    end = parseDate(event.fields[endField]);
                     if (end.getFullYear() > endYear) {
                         endYear = end.getFullYear();
                     }
@@ -91,8 +94,8 @@ Anything LLM in tiddlywiki 5
                 } else {
                     name = event.fields.title;
                 }
-                if (event.fields.people !== undefined) {
-                    people = $tw.utils.parseStringArray("" + event.fields.people, true);
+                if (event.fields[peopleField] !== undefined) {
+                    people = $tw.utils.parseStringArray("" + event.fields[peopleField], true);
                 }
                 title = event.fields.title;
                 events.push({
