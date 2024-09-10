@@ -146,7 +146,10 @@ Anything LLM in tiddlywiki 5
                 const totalDays = (end - start) / (1000 * 60 * 60 * 24);
 
                 const startYearPos = (start.getFullYear() - startYear) * pixelsPerYear;
-                const yearFraction = (start.getMonth() / 12) * pixelsPerYear;
+                const dayOfYear = Math.floor((start - new Date(start.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+                const yearFraction = (dayOfYear / 365) * pixelsPerYear;
+
+                //const yearFraction = (start.getMonth() / 12) * pixelsPerYear;
 
                 const barWidth = (totalDays / 365) * pixelsPerYear;
                 const position = peopleWidth + startYearPos + yearFraction;
