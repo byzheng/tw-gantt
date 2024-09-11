@@ -1,7 +1,7 @@
 author: Bangyou Zheng
 created: 20240801213656241
 description: tw-gantt is to Gantt Chart in Tiddlywiki
-modified: 20240910131910037
+modified: 20240911234108767
 name: tw-gantt
 parent-plugin: 
 plugin-draft: plugin
@@ -9,4 +9,4 @@ source: https://github.com/byzheng/tw-gantt
 tags: 
 title: $:/plugins/bangyou/tw-gantt
 type: application/json
-version: 0.0.4
+version: 0.0.6

@@ -9,6 +9,9 @@ Anything LLM in tiddlywiki 5
     /*global $tw: false */
     "use strict";
     function parseDate(dateString) {
+        if (isValidDate(dateString)) {
+            return dateString;
+        }
         const year = parseInt(dateString.substring(0, 4), 10);
         const month = parseInt(dateString.substring(4, 6), 10) - 1; // Months are 0-based in JavaScript
         const day = parseInt(dateString.substring(6, 8), 10);
@@ -75,6 +78,7 @@ Anything LLM in tiddlywiki 5
             if (this.eventsTiddlers.length === 0) {
                 container.innerText = "no events are found.";
             }
+            let ignore_people = true;
             let events = [];
             for (let i = 0; i < this.eventsTiddlers.length; i++) {
                 const event = $tw.wiki.getTiddler(this.eventsTiddlers[i]);
@@ -98,6 +102,7 @@ Anything LLM in tiddlywiki 5
                 }
                 if (event.fields[peopleField] !== undefined) {
                     people = $tw.utils.parseStringArray("" + event.fields[peopleField], true);
+                    ignore_people = false;
                 }
                 title = event.fields.title;
                 events.push({
@@ -114,7 +119,10 @@ Anything LLM in tiddlywiki 5
             const years = endYear - startYear + 1;
 
             // Gantt Chart Setup
-            const peopleWidth = 10;
+            let peopleWidth = 10;
+            if (ignore_people) {
+                peopleWidth = 0;
+            }
             const containerStyles = window.getComputedStyle(container, null);
             // const chartWidth = chartContainer.getBoundingClientRect().width -
             //     //parseFloat(containerStyles.paddingLeft) -
@@ -125,10 +133,12 @@ Anything LLM in tiddlywiki 5
 
             //renderYears(startYear, endYear, yearLabelsContainer, pixelsPerYear);
             // Function to render year labels
-            const peopleDiv = document.createElement('div');
-            peopleDiv.className = 'gantt-peoples';
-            peopleDiv.style.width = peopleWidth + '%';
-            yearLabelsContainer.appendChild(peopleDiv);
+            if (!ignore_people) {
+                const peopleDiv = document.createElement('div');
+                peopleDiv.className = 'gantt-peoples';
+                peopleDiv.style.width = peopleWidth + '%';
+                yearLabelsContainer.appendChild(peopleDiv);
+            }
             for (let i = startYear; i <= endYear; i++) {
                 const yearDiv = document.createElement('div');
                 yearDiv.className = 'gantt-year';
