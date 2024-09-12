@@ -21,7 +21,7 @@ type: text/css
     position: relative;
     border-bottom: 1px solid #ccc;
     margin-bottom: 20px;
-    width:100%
+    width: 100%
 }
 
 /* Year Labels with Single Color */
@@ -42,7 +42,7 @@ type: text/css
 
 /* Year Labels with Single Color */
 .gantt-peoples {
-    
+
     text-align: center;
     font-weight: bold;
     padding: 10px 0;
@@ -50,12 +50,12 @@ type: text/css
     background-color: #3498DB;
     border-right: 2px solid #fff;
     border-radius: 5px 5px 0 0;
-    width:100px;
+    width: 100px;
 }
 
 /* Year Labels with Single Color */
 .gantt-people {
-    
+
     position: absolute;
     height: 30px;
     color: white;
@@ -64,8 +64,8 @@ type: text/css
     line-height: 30px;
     padding: 0 10px;
     background-color: #cddaf0;
-    overflow: hidden; 
-    text-overflow: ellipsis; 
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Gantt Event Bars */
@@ -78,33 +78,22 @@ type: text/css
     line-height: 30px;
     padding: 0 10px;
     background-color: #d8e7d8;
-    overflow: hidden; 
-    text-overflow: ellipsis; 
-    /* Green */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
 }
-
-/* Example Color Palette for Event Bars */
-.color-1 {
-    background-color: #4CAF50;
-    /* Green */
+.gantt-tooltip {
+    position: fixed;
+    background-color: #f0f0f0;
+    color: #333;
+    padding: 5px;
+    border-radius: 6px;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.1);
+    display: none; /* Initially hidden */
+    z-index: 1000; /* Ensure it's above other elements */
 }
-
-.color-2 {
-    background-color: #FF5733;
-    /* Red */
-}
-
-.color-3 {
-    background-color: #3498DB;
-    /* Blue */
-}
-
-.color-4 {
-    background-color: #F1C40F;
-    /* Yellow */
-}
-
 .gantt-chart {
     position: relative;
     height: 200px;
 }
+

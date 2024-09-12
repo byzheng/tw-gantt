@@ -56,6 +56,14 @@ Anything LLM in tiddlywiki 5
         var startField = this.getAttribute('start', 'start');
         var endField = this.getAttribute('end', 'end');
         var peopleField = this.getAttribute('people', 'people');
+        var tooltipTemplate = this.getAttribute('tooltipTemplate', '');
+        if (tooltipTemplate !== "" && !$tw.wiki.tiddlerExists(tooltipTemplate)) {
+            tooltipTemplate = "";
+        }
+        var eventTemplate = this.getAttribute('eventTemplate', '');
+        if (eventTemplate !== "" && !$tw.wiki.tiddlerExists(eventTemplate)) {
+            eventTemplate = "";
+        }
         try {
             // Create elements for gantt charts
             let yearLabelsContainer = document.createElement('div');
@@ -196,17 +204,32 @@ Anything LLM in tiddlywiki 5
                 eventBar.style.left = position + '%';
                 eventBar.style.width = barWidth + '%';
                 eventBar.style.top = top + 'px';
-                // create a link to tiddler
-                const dom_link = tiddlerLink(title, caption);
-                eventBar.appendChild(dom_link);
+                if (eventTemplate === "") {
+                    // create a link to tiddler
+                    const dom_link = tiddlerLink(title, caption);
+                    eventBar.appendChild(dom_link);
+                } else {
+                    let event_html = $tw.wiki.renderTiddler("text/html", eventTemplate,
+                        { variables: { currentTiddler: title } }
+                    );
+                    event_html = event_html.replace("<p>", "");
+                    event_html = event_html.replace("</p>", "");
+                    eventBar.innerHTML = event_html;
+                }
+                
 
                 // Create a tooltip
                 const tooltip = document.createElement('div');
                 tooltip.className = "gantt-tooltip";
-                //tooltip.innerHTML = "<span>AAAAAAAAA</span>"
-                //tooltip.innerHTML = dom_link.innerHTML;
-                const tooltip_link = tiddlerLink(title, caption);
-                tooltip.appendChild(tooltip_link);
+                if (tooltipTemplate === "") {
+                    const tooltip_link = tiddlerLink(title, caption);
+                    tooltip.appendChild(tooltip_link);
+                } else {
+                    const tooltip_html = $tw.wiki.renderTiddler("text/html", tooltipTemplate,
+                        { variables: { currentTiddler: title } }
+                    );
+                    tooltip.innerHTML = tooltip_html;
+                }
                 let hideTimeout;
                 function showTooltip(event) {
                     tooltip.style.display = 'block';

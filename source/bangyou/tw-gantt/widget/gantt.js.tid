@@ -51,7 +51,7 @@ Anything LLM in tiddlywiki 5
             wiki: $tw.wiki
         });
         this.uuid = (Math.random() + 1).toString(36).substring(3);
-		let container = document.createElement('div');
+        let container = document.createElement('div');
         container.classList.add("gantt-container");
         container.id = this.uuid;
         parent.insertBefore(container, nextSibling);
@@ -64,6 +64,14 @@ Anything LLM in tiddlywiki 5
         var startField = this.getAttribute('start', 'start');
         var endField = this.getAttribute('end', 'end');
         var peopleField = this.getAttribute('people', 'people');
+        var tooltipTemplate = this.getAttribute('tooltipTemplate', '');
+        if (tooltipTemplate !== "" && !$tw.wiki.tiddlerExists(tooltipTemplate)) {
+            tooltipTemplate = "";
+        }
+        var eventTemplate = this.getAttribute('eventTemplate', '');
+        if (eventTemplate !== "" && !$tw.wiki.tiddlerExists(eventTemplate)) {
+            eventTemplate = "";
+        }
         try {
             // Create elements for gantt charts
             let yearLabelsContainer = document.createElement('div');
@@ -204,12 +212,73 @@ Anything LLM in tiddlywiki 5
                 eventBar.style.left = position + '%';
                 eventBar.style.width = barWidth + '%';
                 eventBar.style.top = top + 'px';
-                // create a link to tiddler
+                if (eventTemplate === "") {
+                    // create a link to tiddler
+                    const dom_link = tiddlerLink(title, caption);
+                    eventBar.appendChild(dom_link);
+                } else {
+                    let event_html = $tw.wiki.renderTiddler("text/html", eventTemplate,
+                        { variables: { currentTiddler: title } }
+                    );
+                    event_html = event_html.replace("<p>", "");
+                    event_html = event_html.replace("</p>", "");
+                    eventBar.innerHTML = event_html;
+                }
+                
 
-                const dom_link = tiddlerLink(title, caption);
-                eventBar.appendChild(dom_link);
-                return eventBar;
+                // Create a tooltip
+                const tooltip = document.createElement('div');
+                tooltip.className = "gantt-tooltip";
+                if (tooltipTemplate === "") {
+                    const tooltip_link = tiddlerLink(title, caption);
+                    tooltip.appendChild(tooltip_link);
+                } else {
+                    const tooltip_html = $tw.wiki.renderTiddler("text/html", tooltipTemplate,
+                        { variables: { currentTiddler: title } }
+                    );
+                    tooltip.innerHTML = tooltip_html;
+                }
+                let hideTimeout;
+                function showTooltip(event) {
+                    tooltip.style.display = 'block';
+                    tooltip.style.top = (event.clientY) + 'px';
+                    tooltip.style.left = (event.clientX + 10) + 'px';
+                    clearTimeout(hideTimeout); // Cancel any pending hide operations
+                }
+
+                // Function to hide tooltip
+                function hideTooltip() {
+                    tooltip.style.display = 'none';
+                }
+
+
+                eventBar.addEventListener('mouseenter', function (event) {
+                    showTooltip(event);
+                });
+
+                eventBar.addEventListener('mouseleave', function () {
+                    hideTimeout = setTimeout(() => {
+                        hideTooltip();
+                    }, 500);
+                });
+
+                tooltip.addEventListener('mouseenter', function () {
+                    clearTimeout(hideTimeout); // Cancel hide if entering tooltip
+                });
+
+                // Hide tooltip when mouse leaves the tooltip
+                tooltip.addEventListener('mouseleave', function () {
+                    hideTooltip();
+                });
+
+                const element = document.createElement('div');
+                element.appendChild(eventBar);
+                element.appendChild(tooltip);
+
+                return element;
             }
+
+
 
             // Set container width based on total days
             //container.style.width = `${totalDays * 20}px`;
@@ -271,7 +340,7 @@ Anything LLM in tiddlywiki 5
             return false;
         }
 
-        var changedAttributes = this.computeAttributes();            
+        var changedAttributes = this.computeAttributes();
         var newEventsTiddlers = this.wiki.filterTiddlers(this.filter, this);
         if (newEventsTiddlers.length !== this.eventsTiddlers.length) {
             is_changed_tiddler = true;
