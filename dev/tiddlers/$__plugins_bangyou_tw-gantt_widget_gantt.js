@@ -43,7 +43,7 @@ Anything LLM in tiddlywiki 5
             wiki: $tw.wiki
         });
         this.uuid = (Math.random() + 1).toString(36).substring(3);
-		let container = document.createElement('div');
+        let container = document.createElement('div');
         container.classList.add("gantt-container");
         container.id = this.uuid;
         parent.insertBefore(container, nextSibling);
@@ -197,11 +197,57 @@ Anything LLM in tiddlywiki 5
                 eventBar.style.width = barWidth + '%';
                 eventBar.style.top = top + 'px';
                 // create a link to tiddler
-
                 const dom_link = tiddlerLink(title, caption);
                 eventBar.appendChild(dom_link);
-                return eventBar;
+
+                // Create a tooltip
+                const tooltip = document.createElement('div');
+                tooltip.className = "gantt-tooltip";
+                //tooltip.innerHTML = "<span>AAAAAAAAA</span>"
+                //tooltip.innerHTML = dom_link.innerHTML;
+                const tooltip_link = tiddlerLink(title, caption);
+                tooltip.appendChild(tooltip_link);
+                let hideTimeout;
+                function showTooltip(event) {
+                    tooltip.style.display = 'block';
+                    tooltip.style.top = (event.clientY) + 'px';
+                    tooltip.style.left = (event.clientX + 10) + 'px';
+                    clearTimeout(hideTimeout); // Cancel any pending hide operations
+                }
+
+                // Function to hide tooltip
+                function hideTooltip() {
+                    tooltip.style.display = 'none';
+                }
+
+
+                eventBar.addEventListener('mouseenter', function (event) {
+                    showTooltip(event);
+                });
+
+                eventBar.addEventListener('mouseleave', function () {
+                    hideTimeout = setTimeout(() => {
+                        hideTooltip();
+                    }, 500);
+                });
+
+                tooltip.addEventListener('mouseenter', function () {
+                    clearTimeout(hideTimeout); // Cancel hide if entering tooltip
+                });
+
+                // Hide tooltip when mouse leaves the tooltip
+                tooltip.addEventListener('mouseleave', function () {
+                    hideTooltip();
+                });
+
+                const element = document.createElement('div');
+                element.appendChild(eventBar);
+                element.appendChild(tooltip);
+
+                return element;
             }
+
+
 
             // Set container width based on total days
             //container.style.width = `${totalDays * 20}px`;
@@ -263,7 +309,7 @@ Anything LLM in tiddlywiki 5
             return false;
         }
 
-        var changedAttributes = this.computeAttributes();            
+        var changedAttributes = this.computeAttributes();
         var newEventsTiddlers = this.wiki.filterTiddlers(this.filter, this);
         if (newEventsTiddlers.length !== this.eventsTiddlers.length) {
             is_changed_tiddler = true;
