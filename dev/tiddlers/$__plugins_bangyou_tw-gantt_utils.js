@@ -149,14 +149,16 @@ Gantt Chart in tiddlywiki 5
         }
 
         // Calculate chart width 
+        const maxLabels = 10;
         totalDays = getDays(startChart, endChart) + 1;
         let peopleWidth = hasPeople ? 10 : 0;
         const chartWidth = 100 - peopleWidth;
         const pixelsPerDay = chartWidth / totalDays;
 
         // Function to render year labels
+        let peopleDiv;
         if (hasPeople) {
-            const peopleDiv = document.createElement('div');
+            peopleDiv = document.createElement('div');
             peopleDiv.className = 'gantt-peoples';
             peopleDiv.style.width = peopleWidth + '%';
             labelsContainer.appendChild(peopleDiv);
@@ -170,11 +172,29 @@ Gantt Chart in tiddlywiki 5
             } else {
                 position = getDays(startChart, start) * pixelsPerDay + peopleWidth;
             }
-            const barWidth = getDays(start, end) * pixelsPerDay
-
+            let barWidth = getDays(start, end) * pixelsPerDay
+            //const minWidth = chartWidth / maxLabels
+            // if (barWidth < minWidth) {
+            //     barWidth = minWidth;
+            // }
             return { position, barWidth };
         }
 
+        // function sampleLabels(labelIntervals, maxLabels) {
+        //     let totalLabels = labelIntervals.length;
+        //     let interval = Math.ceil(totalLabels / maxLabels);
+        //     let sampledIntervals = [];
+        
+        //     for (let idx = 0; idx <= totalLabels; idx += interval) {
+        //         if (idx < totalLabels) {
+        //             sampledIntervals.push(labelIntervals[idx]);
+        //         }
+        //     }
+        
+        //     return sampledIntervals;
+        // }
+        
+        //labelIntervals = sampleLabels(labelIntervals, maxLabels);
         for (let i = 0; i < labelIntervals.length; i++) {
             const labelDiv = document.createElement('div');
             labelDiv.className = 'gantt-label';
@@ -186,6 +206,11 @@ Gantt Chart in tiddlywiki 5
             //labelDiv.style.width = pixelsPerDay * getDays(labelIntervals[i].start, labelIntervals[i].end) + '%';
             labelDiv.textContent = labelIntervals[i].name;
             labelsContainer.appendChild(labelDiv);
+        }
+        if (peopleDiv !== undefined) {
+            peopleDiv.style.height = labelsContainer.lastElementChild.offsetHeight + "px";
+            //peopleDiv.style.width = "99%";
+            
         }
         // if (chatType === "years") {
         //     const startYear = startDate.getFullYear();

@@ -31,15 +31,14 @@
 
 /* Year Labels with Single Color */
 .gantt-peoples {
-    height: 41.5px;
     text-align: center;
     font-weight: bold;
-    padding: 10px 0;
+    padding: 10px px;
     color: white;
     background-color: #3498DB;
     border-right: 2px solid #fff;
     border-radius: 5px 5px 0 0;
-    width: 100px;
+    width: 10%;
 }
 
 /* Year Labels with Single Color */

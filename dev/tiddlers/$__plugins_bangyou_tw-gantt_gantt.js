@@ -56,11 +56,16 @@ Gantt Chart in tiddlywiki 5
 
             if (this.eventsTiddlers.length === 0) {
                 container.innerText = "no events are found.";
+                return;
             }
             // Get all events
             let events = [];
             for (let i = 0; i < this.eventsTiddlers.length; i++) {
                 const event = $tw.wiki.getTiddler(this.eventsTiddlers[i]);
+                if (event === undefined) {
+                    container.innerText = "Cannot find event " + this.eventsTiddlers[i];
+                    return;
+                }
                 let start, end, caption, title, people;
                 if (event.fields[startField] !== undefined) {
                     start = event.fields[startField];
