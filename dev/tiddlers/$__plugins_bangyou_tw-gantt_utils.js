@@ -20,12 +20,13 @@ Gantt Chart in tiddlywiki 5
     function isValidDate(d) {
         return d instanceof Date && !isNaN(d);
     }
-    function daysInYear(year) {
-        return ((year % 4 === 0 && year % 100 > 0) || year % 400 == 0) ? 366 : 365;
-    }
 
     function getDays(start, end) {
         return Math.abs(end - start) / (1000 * 3600 * 24);
+    }
+
+    function getMins(start, end) {
+        return Math.abs(end - start) / (1000 * 60);
     }
 
     function getMonthsBetween(startDate, endDate) {
@@ -92,7 +93,7 @@ Gantt Chart in tiddlywiki 5
         //const years = endYear - startYear + 1;
         let totalDays = getDays(startDate, endDate);
         // calculate the chart types
-        let chatType, startChart, endChart, multipler;
+        let chatType, startChart, endChart;
         let labelIntervals = [];
         if (totalDays > 365) {
             chatType = "years";
@@ -107,7 +108,6 @@ Gantt Chart in tiddlywiki 5
                     name: i
                 })
             }
-            multipler = 1;
         } else if (totalDays <= 365 && totalDays > 30) {
             chatType = "months";
             startChart = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
@@ -122,13 +122,12 @@ Gantt Chart in tiddlywiki 5
                     name: months[i].year + "-" + months[i].month
                 })
             }
-            multipler = 1;
         } else {
             chatType = "days";
-            startChart = new Date(startDate);
+            startChart = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
             //startChart.setDate(startChart.getDate() - 1);
-            endChart = new Date(endDate);
-            endChart.setDate(endChart.getDate() + 1);
+            endChart = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+            //endChart.setDate(endChart.getDate() + 1);
             let currentDate = new Date(startChart); 
 
             while (currentDate <= endChart) {
@@ -144,8 +143,7 @@ Gantt Chart in tiddlywiki 5
                 currentDate.setDate(currentDate.getDate() + 1);
             }
             
-            multipler = 24 * 60;
-            totalDays = getDays(startChart, endChart) * multipler;
+            totalDays = getDays(startChart, endChart) + 1;
         }
 
         // Calculate chart width 
@@ -166,11 +164,11 @@ Gantt Chart in tiddlywiki 5
             let position;
             if (center) {
                 let midDate = new Date((start.getTime() + end.getTime()) / 2);
-                position = getDays(startChart, midDate) * multipler * pixelsPerDay + peopleWidth;
+                position = getDays(startChart, midDate) * pixelsPerDay + peopleWidth;
             } else {
-                position = getDays(startChart, start)  * multipler * pixelsPerDay + peopleWidth;
+                position = getDays(startChart, start) * pixelsPerDay + peopleWidth;
             }
-            const barWidth = getDays(start, end)  * multipler * pixelsPerDay
+            const barWidth = getDays(start, end) * pixelsPerDay
 
             return { position, barWidth };
         }
