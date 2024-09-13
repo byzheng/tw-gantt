@@ -20,16 +20,42 @@ Gantt Chart in tiddlywiki 5
     function isValidDate(d) {
         return d instanceof Date && !isNaN(d);
     }
-    
+    function daysInYear(year) {
+        return ((year % 4 === 0 && year % 100 > 0) || year % 400 == 0) ? 366 : 365;
+    }
+
+    function getDays(start, end) {
+        return Math.abs(end - start) / (1000 * 3600 * 24);
+    }
+
+    function getMonthsBetween(startDate, endDate) {
+        let months = [];
+        let currentDate = new Date(startDate); // Start from startDate
+
+        // Loop through each month between startDate and endDate
+        while (currentDate <= endDate) {
+            let year = currentDate.getFullYear();
+            let month = currentDate.getMonth() + 1; // getMonth() is 0-based, so add 1 to make it 1-based
+
+            // Store year and month in the array
+            months.push({ year: year, month: month });
+
+            // Move to the next month
+            currentDate.setMonth(currentDate.getMonth() + 1);
+        }
+
+        return months;
+    }
+
 
     function ganttChart(events, container, eventTemplate, tooltipTemplate, currentTiddler) {
         if (events.length === 0) {
             container.innerText = "No events";
         }
-
+        // for story river
         var openLinkFromInsideRiver = $tw.wiki.getTiddler("$:/config/Navigation/openLinkFromInsideRiver").fields.text;
         var openLinkFromOutsideRiver = $tw.wiki.getTiddler("$:/config/Navigation/openLinkFromOutsideRiver").fields.text;
-        
+
         var the_story = new $tw.Story({
             wiki: $tw.wiki
         });
@@ -38,29 +64,96 @@ Gantt Chart in tiddlywiki 5
         let labelsContainer = document.createElement('div');
         labelsContainer.classList.add("gantt-labels");
         container.appendChild(labelsContainer);
-
-
         let chartContainer = document.createElement('div');
         chartContainer.classList.add("gantt-chart");
         container.appendChild(chartContainer);
+
+
+        // parse date for start and end
+        for (let i = 0; i < events.length; i++) {
+            if (events[i].start !== undefined) {
+                events[i].start = parseDate(events[i].start);
+            }
+            if (events[i].end !== undefined) {
+                events[i].end = parseDate(events[i].end);
+            }
+            if (events[i].end < events[i].start) {
+                container.innerText = "Event end is earlier than start for " + events[i].title;
+                return;
+            }
+        };
 
         const startDate = events.reduce((min, event) => event.start < min ? event.start : min, events[0].start);
         const endDate = events.reduce((max, event) => event.end > max ? event.end : max, events[0].end);
         const hasPeople = events.reduce((found, item) => found || item.people !== undefined, false);
 
-        const startYear = startDate.getFullYear();
-        const endYear = endDate.getFullYear();
 
-        const years = endYear - startYear + 1;
+        
+        //const years = endYear - startYear + 1;
+        let totalDays = getDays(startDate, endDate);
+        // calculate the chart types
+        let chatType, startChart, endChart, multipler;
+        let labelIntervals = [];
+        if (totalDays > 365) {
+            chatType = "years";
+            startChart = new Date(startDate.getFullYear(), 0, 1);
+            endChart = new Date(endDate.getFullYear(), 0, 1);
+            const startYear = startChart.getFullYear();
+            const endYear = endChart.getFullYear() + 1;
+            for (let i = startYear; i < endYear; i++) {
+                labelIntervals.push({
+                    start: new Date(i, 0, 1),
+                    end: new Date(i, 11, 31),
+                    name: i
+                })
+            }
+            multipler = 1;
+        } else if (totalDays <= 365 && totalDays > 30) {
+            chatType = "months";
+            startChart = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+            endChart = new Date(endDate.getFullYear(), endDate.getMonth() + 1, 1);
+            const months = getMonthsBetween(startChart, endChart);
+            for (let i = 0; i < months.length - 1; i++) {
+                let endMonth = new Date(months[i + 1].year, months[i + 1].month - 1, 1);
+                endMonth.setDate(endMonth.getDate() - 1);
+                labelIntervals.push({
+                    start: new Date(months[i].year, months[i].month - 1, 1),
+                    end: endMonth,
+                    name: months[i].year + "-" + months[i].month
+                })
+            }
+            multipler = 1;
+        } else {
+            chatType = "days";
+            startChart = new Date(startDate);
+            //startChart.setDate(startChart.getDate() - 1);
+            endChart = new Date(endDate);
+            endChart.setDate(endChart.getDate() + 1);
+            let currentDate = new Date(startChart); 
+
+            while (currentDate <= endChart) {
+                const startCurrentDate = new Date(currentDate);
+                const endCurrentDate = new Date(currentDate);
+                endCurrentDate.setDate(endCurrentDate.getDate() + 1);
+                labelIntervals.push({
+                    start: startCurrentDate,
+                    end: endCurrentDate,
+                    name: startCurrentDate.getDate()
+                })
+                // Move to the next day
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            multipler = 24 * 60;
+            totalDays = getDays(startChart, endChart) * multipler;
+        }
 
         // Calculate chart width 
+        
         let peopleWidth = hasPeople ? 10 : 0;
-        const containerStyles = window.getComputedStyle(container, null);
         const chartWidth = 100 - peopleWidth;
-        const pixelsPerYear = chartWidth / years;
+        const pixelsPerDay = chartWidth / totalDays;
 
-
-        //renderYears(startYear, endYear, yearLabelsContainer, pixelsPerYear);
         // Function to render year labels
         if (hasPeople) {
             const peopleDiv = document.createElement('div');
@@ -68,36 +161,43 @@ Gantt Chart in tiddlywiki 5
             peopleDiv.style.width = peopleWidth + '%';
             labelsContainer.appendChild(peopleDiv);
         }
-        for (let i = startYear; i <= endYear; i++) {
-            const yearDiv = document.createElement('div');
-            yearDiv.className = 'gantt-label';
-            yearDiv.style.width = pixelsPerYear + '%';
-            yearDiv.textContent = i;
-            labelsContainer.appendChild(yearDiv);
-        }
 
-        // Variables for timeline calculation
-        // const minDate = new Date(Math.min(...events.map(eventTitle => new Date(.fields.start))));
-        // const maxDate = new Date(Math.max(...events.map(eventTitle => new Date($tw.wiki.getTiddler(eventTitle).fields.end))));
-        // const totalDays = dateDiffInDays(minDate, maxDate);
+        function calculatePosition(start, end, pixelsPerDay, center = false) {
+            let position;
+            if (center) {
+                let midDate = new Date((start.getTime() + end.getTime()) / 2);
+                position = getDays(startChart, midDate) * multipler * pixelsPerDay + peopleWidth;
+            } else {
+                position = getDays(startChart, start)  * multipler * pixelsPerDay + peopleWidth;
+            }
+            const barWidth = getDays(start, end)  * multipler * pixelsPerDay
 
-        
-        function calculatePosition(start, end) {
-            // const start = parseDate(startDate);
-            // const end = parseDate(endDate);
-            const totalDays = (end - start) / (1000 * 60 * 60 * 24);
-    
-            const startYearPos = (start.getFullYear() - startYear) * pixelsPerYear;
-            const dayOfYear = Math.floor((start - new Date(start.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-            const yearFraction = (dayOfYear / 365) * pixelsPerYear;
-    
-            //const yearFraction = (start.getMonth() / 12) * pixelsPerYear;
-    
-            const barWidth = (totalDays / 365) * pixelsPerYear;
-            const position = peopleWidth + startYearPos + yearFraction;
-    
             return { position, barWidth };
         }
+
+        for (let i = 0; i < labelIntervals.length; i++) {
+            const labelDiv = document.createElement('div');
+            labelDiv.className = 'gantt-label';
+            let { position, barWidth } = calculatePosition(
+                labelIntervals[i].start,
+                labelIntervals[i].end, pixelsPerDay, true);
+            labelDiv.style.left = position + '%';
+            labelDiv.style.width = barWidth + '%';
+            //labelDiv.style.width = pixelsPerDay * getDays(labelIntervals[i].start, labelIntervals[i].end) + '%';
+            labelDiv.textContent = labelIntervals[i].name;
+            labelsContainer.appendChild(labelDiv);
+        }
+        // if (chatType === "years") {
+        //     const startYear = startDate.getFullYear();
+        //     const endYear = endDate.getFullYear();
+        //     for (let i = startYear; i <= endYear; i++) {
+        //         const yearDiv = document.createElement('div');
+        //         yearDiv.className = 'gantt-label';
+        //         yearDiv.style.width = pixelsPerDay * daysInYear(i) + '%';
+        //         yearDiv.textContent = i;
+        //         labelsContainer.appendChild(yearDiv);
+        //     }
+        // }
 
 
         function tiddlerLink(title, caption = title) {
@@ -140,8 +240,8 @@ Gantt Chart in tiddlywiki 5
                 event_html = event_html.replace("</p>", "");
                 eventBar.innerHTML = event_html;
             }
-            
-    
+
+
             // Create a tooltip
             const tooltip = document.createElement('div');
             tooltip.className = "gantt-tooltip";
@@ -161,44 +261,45 @@ Gantt Chart in tiddlywiki 5
                 tooltip.style.left = (event.clientX + 10) + 'px';
                 clearTimeout(hideTimeout); // Cancel any pending hide operations
             }
-    
+
             // Function to hide tooltip
             function hideTooltip() {
                 tooltip.style.display = 'none';
             }
-    
-    
+
+
             eventBar.addEventListener('mouseenter', function (event) {
                 showTooltip(event);
             });
-    
+
             eventBar.addEventListener('mouseleave', function () {
                 hideTimeout = setTimeout(() => {
                     hideTooltip();
                 }, 500);
             });
-    
+
             tooltip.addEventListener('mouseenter', function () {
                 clearTimeout(hideTimeout); // Cancel hide if entering tooltip
             });
-    
+
             // Hide tooltip when mouse leaves the tooltip
             tooltip.addEventListener('mouseleave', function () {
                 hideTooltip();
             });
-    
+
             const element = document.createElement('div');
             element.appendChild(eventBar);
             element.appendChild(tooltip);
-    
+
             return element;
         }
-    
+
         // Set container width based on total days
         //container.style.width = `${totalDays * 20}px`;
+        const offsetTop = 50;
         events.forEach((event, index) => {
             // position of top
-            const top = (index * 40);
+            const top = (index * 40) + offsetTop;
             // Add people
             if (event.people !== undefined) {
                 event.people.forEach((people, index) => {
@@ -212,17 +313,17 @@ Gantt Chart in tiddlywiki 5
             let end = event.end;
             // If mising start or end assume from start to end years
             if (!isValidDate(start)) {
-                start = new Date(startYear, 0, 1);
+                start = startChart;
             }
             if (!isValidDate(end)) {
-                end = new Date(endYear, 11, 31);
+                end = endChart;
             }
-            const { position, barWidth } = calculatePosition(start, end);
+            const { position, barWidth } = calculatePosition(start, end, pixelsPerDay);
 
             let eventBar = createBar(position, barWidth, top, event.title, event.caption);
             chartContainer.appendChild(eventBar);
         });
-        chartContainer.style.height = (events.length * 40) + "px";
+        chartContainer.style.height = (events.length * 40) + offsetTop + "px";
 
 
 

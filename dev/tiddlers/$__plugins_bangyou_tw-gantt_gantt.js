@@ -8,18 +8,7 @@ Gantt Chart in tiddlywiki 5
     /*jslint node: true, browser: true */
     /*global $tw: false */
     "use strict";
-    function parseDate(dateString) {
-        if (isValidDate(dateString)) {
-            return dateString;
-        }
-        const year = parseInt(dateString.substring(0, 4), 10);
-        const month = parseInt(dateString.substring(4, 6), 10) - 1; // Months are 0-based in JavaScript
-        const day = parseInt(dateString.substring(6, 8), 10);
-        return new Date(year, month, day);
-    }
-    function isValidDate(d) {
-        return d instanceof Date && !isNaN(d);
-    }
+    
 
     var Widget = require("$:/core/modules/widgets/widget.js").widget;
     var ganttChart = require("$:/plugins/bangyou/tw-gantt/utils.js").ganttChart;
@@ -74,10 +63,10 @@ Gantt Chart in tiddlywiki 5
                 const event = $tw.wiki.getTiddler(this.eventsTiddlers[i]);
                 let start, end, caption, title, people;
                 if (event.fields[startField] !== undefined) {
-                    start = parseDate(event.fields[startField]);
+                    start = event.fields[startField];
                 }
                 if (event.fields[endField] !== undefined) {
-                    end = parseDate(event.fields[endField]);
+                    end = event.fields[endField];
                 }
                 if (event.fields.caption !== undefined) {
                     caption = event.fields.caption;
