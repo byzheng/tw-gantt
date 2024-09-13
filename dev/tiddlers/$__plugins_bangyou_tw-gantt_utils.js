@@ -75,21 +75,33 @@ Gantt Chart in tiddlywiki 5
 
 
         // parse date for start and end
+        let startDate, endDate;
         for (let i = 0; i < events.length; i++) {
             if (events[i].start !== undefined) {
                 events[i].start = parseDate(events[i].start);
+                if (startDate === undefined) {
+                    startDate = events[i].start;
+                } else if (startDate > events[i].start) {
+                    startDate = events[i].start;
+                }
             }
             if (events[i].end !== undefined) {
                 events[i].end = parseDate(events[i].end);
+                if (endDate === undefined) {
+                    endDate = events[i].end;
+                } else if (endDate < events[i].end) {
+                    endDate = events[i].end;
+                }
             }
             if (events[i].end < events[i].start) {
                 container.innerText = "Event end is earlier than start for " + events[i].title;
                 return;
             }
         };
-
-        const startDate = events.reduce((min, event) => event.start < min ? event.start : min, events[0].start);
-        const endDate = events.reduce((max, event) => event.end > max ? event.end : max, events[0].end);
+        if (startDate === undefined || endDate === undefined) {
+            container.innerText = "start or end fields should be specified at least in one tiddler.";
+            return;
+        }
         const hasPeople = events.reduce((found, item) => found || item.people !== undefined, false);
 
 
@@ -180,20 +192,7 @@ Gantt Chart in tiddlywiki 5
             return { position, barWidth };
         }
 
-        // function sampleLabels(labelIntervals, maxLabels) {
-        //     let totalLabels = labelIntervals.length;
-        //     let interval = Math.ceil(totalLabels / maxLabels);
-        //     let sampledIntervals = [];
-        
-        //     for (let idx = 0; idx <= totalLabels; idx += interval) {
-        //         if (idx < totalLabels) {
-        //             sampledIntervals.push(labelIntervals[idx]);
-        //         }
-        //     }
-        
-        //     return sampledIntervals;
-        // }
-        
+
         //labelIntervals = sampleLabels(labelIntervals, maxLabels);
         for (let i = 0; i < labelIntervals.length; i++) {
             const labelDiv = document.createElement('div');
