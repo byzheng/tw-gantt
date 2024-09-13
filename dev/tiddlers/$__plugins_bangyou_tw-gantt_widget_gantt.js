@@ -1,6 +1,6 @@
 /*\
 
-Anything LLM in tiddlywiki 5
+Gantt Chart in tiddlywiki 5
 
 \*/
 (function () {
