@@ -55,6 +55,7 @@ Gantt Chart in tiddlywiki 5
     function ganttChart(events, container, eventTemplate, tooltipTemplate, currentTiddler) {
         if (events.length === 0) {
             container.innerText = "No events";
+            return;
         }
         // for story river
         var openLinkFromInsideRiver = $tw.wiki.getTiddler("$:/config/Navigation/openLinkFromInsideRiver").fields.text;
@@ -101,7 +102,7 @@ Gantt Chart in tiddlywiki 5
         if (totalDays > 365) {
             chatType = "years";
             startChart = new Date(startDate.getFullYear(), 0, 1);
-            endChart = new Date(endDate.getFullYear(), 0, 1);
+            endChart = new Date(endDate.getFullYear(), 11, 31);
             const startYear = startChart.getFullYear();
             const endYear = endChart.getFullYear() + 1;
             for (let i = startYear; i < endYear; i++) {
@@ -145,12 +146,10 @@ Gantt Chart in tiddlywiki 5
                 // Move to the next day
                 currentDate.setDate(currentDate.getDate() + 1);
             }
-
-            totalDays = getDays(startChart, endChart) + 1;
         }
 
         // Calculate chart width 
-
+        totalDays = getDays(startChart, endChart) + 1;
         let peopleWidth = hasPeople ? 10 : 0;
         const chartWidth = 100 - peopleWidth;
         const pixelsPerDay = chartWidth / totalDays;
