@@ -39,7 +39,10 @@ Gantt Chart in tiddlywiki 5
             let month = currentDate.getMonth() + 1; // getMonth() is 0-based, so add 1 to make it 1-based
 
             // Store year and month in the array
-            months.push({ year: year, month: month });
+            months.push({
+                year: year, month: month,
+                name: currentDate.toLocaleString('en-US', { month: 'short' })
+            });
 
             // Move to the next month
             currentDate.setMonth(currentDate.getMonth() + 1);
@@ -89,7 +92,7 @@ Gantt Chart in tiddlywiki 5
         const hasPeople = events.reduce((found, item) => found || item.people !== undefined, false);
 
 
-        
+
         //const years = endYear - startYear + 1;
         let totalDays = getDays(startDate, endDate);
         // calculate the chart types
@@ -119,7 +122,7 @@ Gantt Chart in tiddlywiki 5
                 labelIntervals.push({
                     start: new Date(months[i].year, months[i].month - 1, 1),
                     end: endMonth,
-                    name: months[i].year + "-" + months[i].month
+                    name: months[i].name
                 })
             }
         } else {
@@ -128,7 +131,7 @@ Gantt Chart in tiddlywiki 5
             //startChart.setDate(startChart.getDate() - 1);
             endChart = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
             //endChart.setDate(endChart.getDate() + 1);
-            let currentDate = new Date(startChart); 
+            let currentDate = new Date(startChart);
 
             while (currentDate <= endChart) {
                 const startCurrentDate = new Date(currentDate);
@@ -142,12 +145,12 @@ Gantt Chart in tiddlywiki 5
                 // Move to the next day
                 currentDate.setDate(currentDate.getDate() + 1);
             }
-            
+
             totalDays = getDays(startChart, endChart) + 1;
         }
 
         // Calculate chart width 
-        
+
         let peopleWidth = hasPeople ? 10 : 0;
         const chartWidth = 100 - peopleWidth;
         const pixelsPerDay = chartWidth / totalDays;
