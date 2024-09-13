@@ -37,12 +37,7 @@ Gantt Chart in tiddlywiki 5
     MyWidget.prototype.render = function (parent, nextSibling) {
         this.parentDomNode = parent;
         this.computeAttributes();
-        var openLinkFromInsideRiver = $tw.wiki.getTiddler("$:/config/Navigation/openLinkFromInsideRiver").fields.text;
-        var openLinkFromOutsideRiver = $tw.wiki.getTiddler("$:/config/Navigation/openLinkFromOutsideRiver").fields.text;
-        var current_tiddler = this.getAttribute("tiddler", this.getVariable("currentTiddler"));
-        var the_story = new $tw.Story({
-            wiki: $tw.wiki
-        });
+        var currentTiddler = this.getAttribute("tiddler", this.getVariable("currentTiddler"));
         this.uuid = (Math.random() + 1).toString(36).substring(3);
         let container = document.createElement('div');
         container.classList.add("gantt-container");
@@ -101,7 +96,7 @@ Gantt Chart in tiddlywiki 5
                     people: people
                 })
             };
-            ganttChart(events, container, eventTemplate, tooltipTemplate);
+            ganttChart(events, container, eventTemplate, tooltipTemplate, currentTiddler);
 
         } catch (e) {
             console.log(e)

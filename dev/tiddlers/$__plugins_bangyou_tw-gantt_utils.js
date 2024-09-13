@@ -22,10 +22,18 @@ Gantt Chart in tiddlywiki 5
     }
     
 
-    function ganttChart(events, container, eventTemplate, tooltipTemplate) {
+    function ganttChart(events, container, eventTemplate, tooltipTemplate, currentTiddler) {
         if (events.length === 0) {
             container.innerText = "No events";
         }
+
+        var openLinkFromInsideRiver = $tw.wiki.getTiddler("$:/config/Navigation/openLinkFromInsideRiver").fields.text;
+        var openLinkFromOutsideRiver = $tw.wiki.getTiddler("$:/config/Navigation/openLinkFromOutsideRiver").fields.text;
+        
+        var the_story = new $tw.Story({
+            wiki: $tw.wiki
+        });
+
         // Create elements for gantt charts
         let labelsContainer = document.createElement('div');
         labelsContainer.classList.add("gantt-labels");
@@ -38,7 +46,7 @@ Gantt Chart in tiddlywiki 5
 
         const startDate = events.reduce((min, event) => event.start < min ? event.start : min, events[0].start);
         const endDate = events.reduce((max, event) => event.end > max ? event.end : max, events[0].end);
-        const hasPeople = events.reduce((found, item) => found || item.hasOwnProperty('people'), false);
+        const hasPeople = events.reduce((found, item) => found || item.people !== undefined, false);
 
         const startYear = startDate.getFullYear();
         const endYear = endDate.getFullYear();
@@ -105,7 +113,7 @@ Gantt Chart in tiddlywiki 5
             dom_link.innerText = caption;
             dom_link.addEventListener("click", function (e) {
                 e.preventDefault();
-                the_story.addToStory(title, current_tiddler, {
+                the_story.addToStory(title, currentTiddler, {
                     openLinkFromInsideRiver: openLinkFromInsideRiver,
                     openLinkFromOutsideRiver: openLinkFromOutsideRiver
                 });
